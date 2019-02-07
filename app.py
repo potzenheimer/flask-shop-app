@@ -47,8 +47,10 @@ class ItemForm(Form):
 
     db_session = DBSession()
     # get categories for dropdown
-    categories = db_session.query(Categories)
-    CATEGORY_CHOICES = [(c.name, c.name) for c in categories]
+    stored_categories = db_session.query(Categories)
+    # Define flat list of categories to allow for index selection
+    CATEGORIES = [category.name for category in stored_categories]
+    CATEGORY_CHOICES = [(category, category) for category in CATEGORIES]
 
     name = StringField('Name', [validators.Length(min=1, max=200)])
     detail = TextAreaField('Detail', [validators.Length(min=3)])
@@ -364,7 +366,15 @@ def edit_item(id):
 
     # Populate item form fields
     #form = ItemForm(request.POST, obj=categories)
-    form.category.choices = [(c.name, c.name) for c in categories]
+    
+    # Note: Moved choices to form instance
+    # form.category.choices = [(c.name, c.name) for c in categories]
+
+    # Set category default value as runtime configuration
+    # TODO: Refactor me - I am yet untested example code
+    form.category.default = form.CATEGORY_CHOICES[
+        form.CATEGORIES.index(item.category)
+    ]
     form.category.default = [(item.category, item.category)]
     form.name.data = item.name
     form.detail.data = item.detail
