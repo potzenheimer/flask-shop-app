@@ -44,9 +44,19 @@ class CategoryForm(Form):
 
 # Item Form Class
 class ItemForm(Form):
+
+    db_session = DBSession()
+    # get categories for dropdown
+    categories = db_session.query(Categories)
+    CATEGORY_CHOICES = [(c.name, c.name) for c in categories]
+
     name = StringField('Name', [validators.Length(min=1, max=200)])
     detail = TextAreaField('Detail', [validators.Length(min=3)])
-    category = SelectField('Category', [validators.DataRequired()])
+    category = SelectField(
+        'Category',
+        [validators.DataRequired()],
+        choices=CATEGORY_CHOICES
+    )
 
 
 # Check if user logged in
